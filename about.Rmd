@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 #### About the Topic
 
 #### About the Data
+The Design Census data was collected by The American Institute of Graphic Arts (AIGA) most recently in 2017 and 2019. The Design Census was a survey that was circulated in the design community and open to public for 5 weeks. The raw csv data files were downloaded from the Design Census websites, which can be found [here for the 2019 data](https://designcensus.org/) and [here for the 2017 data](http://designcensus2017.aiga.org/).
+
+In order to make sense of the zip codes from the aforementioned data sets, a US zip codes data set was used to configure zip codes to states and cities. The zip codes dataset can be found [here](https://simplemaps.com/data/us-zips).
 
 #### About Me
 

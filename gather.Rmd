@@ -14,16 +14,45 @@ library(readr)
 library(janitor)
 ```
 
-```{r cleaning data, echo=FALSE}
+```{r cleaning and loading data, echo=FALSE}
 census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
   clean_names() %>%
   rename(career_duration = i_ve_worked_in_design_for,
          job_type = i_work_in,
          industry_type = industries_i_work_with,
          skills = my_skills_include,
+         currently_learning = i_am_currently_learning,
+         employment_status = i_am_currently_a_an,
+         level = i_m_a_an,
+         job_challenges = my_job_is_challenging_because,
+         job_pros = my_job_is_great_because,
+         org_size = my_organization_has,
+         department_size = my_department_has,
+         job_duration = i_ve_worked_here_for,
+         role_duration = i_ve_had_my_role_for,
+         work_hours = i_typically_work,
+         salary = i_make,
+         benefits = my_benefits_include,
+         advancement_opportunities = i_have,
+         learning_status = i_am,
+         satisfaction_level = i_am_1,
+         stability = i_feel,
+         side_gigs = on_the_side_i,
          learned_design_from = i_learned_design_from,
          degree = i_got_my_degree_in,
-         zip_code = my_zip_code_is)
+         number_of_jobs = i_ve_had,
+         up_to_date_method = i_stay_current_with_design_by,
+         zip_code = my_zip_code_is,
+         age = my_age_is,
+         gender = i_identify_as,
+         ethnicity = i_am_2,
+         issues_in_design = i_feel_the_most_critical_issues_challenges_currently_facing_design_are,
+         biggest_future_impact = i_think_the_emerging_future_technologies_that_will_have_the_biggest_impact_on_design_are,
+         most_critical_skills = i_think_the_most_critical_design_skills_for_the_future_will_be,
+         priorities = my_main_priorities_are) %>%
+  select(-i_work_in_1, -i_work_in_2, -i_work_in_3, -i_m_not_currently_working_because, -i_feel_the_most_critical_issues_challenges_currently_facing_design_are_1) %>%
+  mutate(census_year = 2019)
+
 
 us_zips <- read.csv("./raw-data/uszips.csv") %>%
   select(zip, state_name, lat, lng)
