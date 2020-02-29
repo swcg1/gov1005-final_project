@@ -23,7 +23,7 @@ census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
          skills = my_skills_include,
          currently_learning = i_am_currently_learning,
          employment_status = i_am_currently_a_an,
-         level = i_m_a_an,
+         job_level = i_m_a_an,
          job_challenges = my_job_is_challenging_because,
          job_pros = my_job_is_great_because,
          org_size = my_organization_has,
@@ -35,13 +35,14 @@ census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
          benefits = my_benefits_include,
          advancement_opportunities = i_have,
          learning_status = i_am,
-         satisfaction_level = i_am_1,
-         stability = i_feel,
+         design_satisfaction_level = i_am_1,
+         job_stability = i_feel,
          side_gigs = on_the_side_i,
          learned_design_from = i_learned_design_from,
-         degree = i_got_my_degree_in,
+         degree_subject = i_got_my_degree_in,
          number_of_jobs = i_ve_had,
          up_to_date_method = i_stay_current_with_design_by,
+         job_satisfaction_level = i_m_currently,
          zip_code = my_zip_code_is,
          age = my_age_is,
          gender = i_identify_as,
@@ -53,6 +54,50 @@ census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
   select(-i_work_in_1, -i_work_in_2, -i_work_in_3, -i_m_not_currently_working_because, -i_feel_the_most_critical_issues_challenges_currently_facing_design_are_1) %>%
   mutate(census_year = 2019)
 
+census_2017 <- read.csv("./raw-data/design_census_2017.csv") %>%
+  clean_names() %>%
+  rename(career_duration = starts_with("x1_"),
+         job_type = starts_with("x2_"),
+         skills = starts_with("x3_"),
+         employment_status = starts_with("x4_"),
+         company_type = starts_with("x5_"),
+         org_size = starts_with("x9_"),
+         department_size = starts_with("x10_"),
+         industry_type = starts_with("x11_"),
+         job_duration = starts_with("x12_"),
+         job_level = starts_with("x13_"),
+         role_duration = starts_with("x16_"),
+         work_hours = starts_with("x17_"),
+         salary = starts_with("x18_"),
+         benefits = starts_with("x19_"),
+         advancement_opportunities = starts_with("x20_"),
+         learning_status = starts_with("x21_"),
+         job_satisfaction_level = starts_with("x22_"),
+         job_stability = starts_with("x23_"),
+         side_gigs = starts_with("x24"),
+         cups_of_coffee = starts_with("x25"),
+         highest_education = starts_with("x26_"),
+         learned_design_from = starts_with("x27_"),
+         degree_subject = starts_with("x28_"),
+         number_of_jobs = starts_with("x29_"),
+         number_of_job_shifts = starts_with("x30_"),
+         up_to_date_method = starts_with("x31_"),
+         areas_of_improvement = starts_with("x33_"),
+         job_status = starts_with("x34_"),
+         zip_code = starts_with("x36_"),
+         age = starts_with("x37_"),
+         gender = starts_with("x38_"),
+         lgbtqia_status = starts_with("x39_"),
+         ethnicity = starts_with("x40_"),
+         issues_in_design = starts_with("x41_"),
+         biggest_future_impact = starts_with("x42_"),
+         most_critical_skills = starts_with("x43_")) %>%
+  select(-starts_with("x6_"),
+         -starts_with("x7_"),
+         -starts_with("x8_"),
+         -starts_with("x14_"),
+         -starts_with("x32_"),
+         -starts_with("x35_"))
 
 us_zips <- read.csv("./raw-data/uszips.csv") %>%
   select(zip, state_name, lat, lng)
@@ -71,7 +116,17 @@ census_2019_region <- census_2019 %>%
   ggplot(aes(n, state_name)) +
   geom_point()
 
+census_2017_region <- census_2017 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name) %>%
+  na.omit() %>%
+  group_by(state_name) %>%
+  count() %>%
+  ggplot(aes(n, state_name)) +
+  geom_point()
+
 census_2019_region
+census_2017_region
 ```
 
 
