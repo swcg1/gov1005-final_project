@@ -39,6 +39,21 @@ zip codes data set from SimpleMaps was used to configure zip codes to states and
 cities. The zip codes dataset can be found
 [here](https://simplemaps.com/data/us-zips).
 
+#### Progress and Plans
+So far, I have cleaned up the variable/column names for the design census data
+sets as they were quite messy and had uninformative variable/column names
+initially. Although the data between the 2017 and 2019 surveys didn't match up
+exactly, I tried to be as consistent as possible between the two for greater
+ease in data analysis in the future.
+
+I have done some preliminary analysis of the distribution of designers and
+companies by state to ensure that there is a wide enough distribution for
+analysis. However, I still need to flesh out how exactly I want to analyze the
+relationship between the spread of companies and designers. There are a lot of
+variables from the design census data sets that I need to parse through and
+figure out which specific aspects are the most informative and will be the most
+interesting to analyze.
+
 #### About Me
 I am a senior concentrating in Neuroscience with a secondary in Mind, Brain, and
 Behavior. 
