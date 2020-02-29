@@ -1,0 +1,49 @@
+---
+title: 'Milestone #3'
+author: "Stephanie Cheng"
+date: "2/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(janitor)
+```
+
+```{r cleaning data, echo=FALSE}
+census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
+  clean_names() %>%
+  rename(career_duration = i_ve_worked_in_design_for,
+         job_type = i_work_in,
+         industry_type = industries_i_work_with,
+         skills = my_skills_include,
+         learned_design_from = i_learned_design_from,
+         degree = i_got_my_degree_in,
+         zip_code = my_zip_code_is)
+
+us_zips <- read.csv("./raw-data/uszips.csv") %>%
+  select(zip, state_name, lat, lng)
+```
+
+```{r initial analysis, echo=FALSE}
+
+# join zip code and state names to census data
+
+census_2019_region <- census_2019 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name) %>%
+  na.omit() %>%
+  group_by(state_name) %>%
+  count() %>%
+  ggplot(aes(n, state_name)) +
+  geom_point()
+
+census_2019_region
+```
+
+
+

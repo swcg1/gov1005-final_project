@@ -1,0 +1,19 @@
+---
+title: "About Page Draft"
+author: "Stephanie Cheng"
+date: "2/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### About the Topic
+
+#### About the Data
+
+#### About Me
+
+#### Github repo
+https://github.com/swcg1/gov1005-milestone3
