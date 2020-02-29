@@ -101,32 +101,53 @@ census_2017 <- read.csv("./raw-data/design_census_2017.csv") %>%
 
 us_zips <- read.csv("./raw-data/uszips.csv") %>%
   select(zip, state_name, lat, lng)
+
+us_companies <- read.csv("./raw-data/us_companies.csv")
 ```
 
 ```{r initial analysis, echo=FALSE}
 
 # join zip code and state names to census data
 
-census_2019_region <- census_2019 %>%
+census_2019_by_state <- census_2019 %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
   select(zip_code, state_name) %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
   ggplot(aes(n, state_name)) +
-  geom_point()
+  geom_point() +
+    labs(title = "Distribution of Designers by State in 2019",
+       x = "Number of designers",
+       y = "State")
 
-census_2017_region <- census_2017 %>%
+census_2017_by_state <- census_2017 %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
   select(zip_code, state_name) %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
   ggplot(aes(n, state_name)) +
-  geom_point()
+  geom_point() +
+  labs(title = "Distribution of Designers by State in 2017",
+       x = "Number of designers",
+       y = "State")
 
-census_2019_region
-census_2017_region
+us_companies_by_state <- us_companies %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name) %>%
+  na.omit() %>%
+  group_by(state_name) %>%
+  count() %>%
+  ggplot(aes(n, state_name)) +
+  geom_point() +
+  labs(title = "US Companies Distribution by State",
+       x = "Number of companies",
+       y = "State")
+
+census_2019_by_state
+census_2017_by_state
+us_companies_by_state
 ```
 
 
