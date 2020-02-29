@@ -41,9 +41,7 @@ cities. The zip codes dataset can be found
 
 #### About Me
 I am a senior concentrating in Neuroscience with a secondary in Mind, Brain, and
-Behavior. I have a wide range of interests from life sciences to engineering to
-design and would love to chat with anyone who's curious about any of the above
-(or anyone who's curious in general)!
+Behavior. 
 
 My design porftolio can be found [here](http://www.stephcheng.com) and the github repo to
 this project can be found
