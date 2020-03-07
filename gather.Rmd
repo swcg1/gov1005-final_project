@@ -1,7 +1,7 @@
 ---
-title: 'Milestone #3'
+title: 'Milestone #4'
 author: "Stephanie Cheng"
-date: "2/28/2020"
+date: "3/6/2020"
 output: html_document
 ---
 
@@ -12,9 +12,19 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 library(janitor)
+library(magrittr)
 ```
 
 ```{r cleaning and loading data, echo=FALSE}
+
+# To clean and load the data, I used read.csv to read the csv files. I then used
+# clean_names() from the janitor package to make the column names easier to work
+# with. Then I went through and renamed all the column names with appropriate
+# variable names since the original names were in the form of questions that the
+# questionnaire initially used (which are long and tedious to work with). I did
+# this for both the 2017 and 2019 data, trying my best to be consistent across
+# the data since the questionnaries for both years were slightly different.
+
 census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
   clean_names() %>%
   rename(career_duration = i_ve_worked_in_design_for,
@@ -99,15 +109,41 @@ census_2017 <- read.csv("./raw-data/design_census_2017.csv") %>%
          -starts_with("x32_"),
          -starts_with("x35_"))
 
+# the us zipcode and us company data did not need much cleaning! I simply
+# selected useful columns from the zipcode data.
+
 us_zips <- read.csv("./raw-data/uszips.csv") %>%
   select(zip, state_name, lat, lng)
 
 us_companies <- read.csv("./raw-data/us_companies.csv")
 ```
 
+## Initial Data Analysis and Further Cleaning
+For the Milestone this week, I wanted to take a closer dive into the data
+through making preliminary bar graphs of the distribution of designers across
+states (over the two different design census years) as well as distribution of
+US companies across states. I first cleaned up the bar graphs for the design
+census by normalizing by the total number of census respondents each year so I
+had a percent of the designers in each state (rather than just the raw count).
+This was key so that I could compare the data across both years. For the US
+companies data, I just left the data as raw count because I didn't have a direct
+comparison just yet. Then I went ahead and joined the data for the two years of
+design census and created a joined bar graph that compares the percent
+distribution of designers in different states in each year. I feel pretty good
+about this preliminary analysis and am excited to wrangle the rest of this
+dataset as there are a multitude of other variables I can investigate! (My
+detailed processes for making this graphics are in commented in the code)
+
+
 ```{r initial analysis, echo=FALSE}
 
-# join zip code and state names to census data
+# 2019 data
+
+# For the design census data, I first joined them with the us zipcode data so I
+# could gather the states of each respondent. I made sure to omit the NAs using
+# na.omit so I could cleanly analyze the location data. I grouped by state_name
+# and counted the number of respondents so I could get a tally of the number of
+# designers in each state.
 
 census_2019_by_state <- census_2019 %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
@@ -115,11 +151,35 @@ census_2019_by_state <- census_2019 %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
-  ggplot(aes(n, state_name)) +
-  geom_point() +
-    labs(title = "Distribution of Designers by State in 2019",
-       x = "Number of designers",
-       y = "State")
+  arrange(desc(n))
+
+# I then used the summarize function with a new variable that takes the total
+# number of designers across all states. This variable will be useful for
+# normalizing the bar plot data so I can do a cross comparison over the two
+# different years.
+
+census_2019_total <- census_2019_by_state %>%
+  summarize(total_sum = sum(census_2019_by_state$n)) %>%
+  slice(1) %>%
+  pull(total_sum)
+  
+# I made a bar plot that displays all the states and the corresponding percent
+# of designers so I can get a sense of the distribution. To ensure the plot
+# displayed correctly, I had to set stat as "identity" in geom_bar() so it's not
+# the default stat count. I made sure to do coord_flip() because the state names
+# are long and fit better on the y-axis.
+
+census_2019_bar <- census_2019_by_state %>%
+  ggplot(aes(x = state_name, y = n/census_2019_total)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Distribution of Designers by State in 2019",
+       y = "Percent of Designers",
+       x = "State")
+
+# 2017 data
+
+# I repeated the same procedure below for the 2017 census data as well.
 
 census_2017_by_state <- census_2017 %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
@@ -127,11 +187,22 @@ census_2017_by_state <- census_2017 %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
-  ggplot(aes(n, state_name)) +
-  geom_point() +
+  arrange(desc(n))
+
+census_2017_total <- census_2017_by_state %>%
+  summarize(total_sum = sum(census_2017_by_state$n)) %>%
+  slice(1) %>%
+  pull(total_sum)
+
+census_2017_bar <- census_2017_by_state %>%
+  ggplot(aes(x = state_name, y = n/census_2019_total)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
   labs(title = "Distribution of Designers by State in 2017",
-       x = "Number of designers",
-       y = "State")
+       y = "Percent of Designers",
+       x = "State")
+
+# US company data
 
 us_companies_by_state <- us_companies %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
@@ -139,15 +210,57 @@ us_companies_by_state <- us_companies %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
-  ggplot(aes(n, state_name)) +
-  geom_point() +
+  ggplot(aes(state_name, n)) +
+  geom_bar(stat = "identity") +
   labs(title = "US Companies Distribution by State",
-       x = "Number of companies",
-       y = "State")
+       x = "State",
+       y = "Number of companies") +
+  coord_flip()
 
-census_2019_by_state
-census_2017_by_state
+census_2019_bar
+census_2017_bar
 us_companies_by_state
+```
+
+```{r comparison over two years, echo=FALSE}
+
+# To make the comparison bar graphs I initially slided for the top 10 most
+# designer populated states since displaying all the states isn't very
+# informative at this moment. I then used the mutate function to add a year
+# column and a percent column that takes the count and divides by the total
+# number of respondents that year and multiplies by 100 to get percentage
+# values.
+
+
+top_10_states_2019 <- as_tibble(census_2019_by_state) %>%
+  slice(1:10) %>%
+  mutate(year = rep("2019"),
+         percent = n/census_2019_total*100)
+
+top_10_states_2017 <- as_tibble(census_2017_by_state) %>%
+  slice(1:10) %>%
+  mutate(year = rep("2017"),
+         percent = n/census_2017_total*100)
+
+# I used rbind to stack the datasets on top of each other.
+
+joined_top_10_states <- rbind(top_10_states_2019, top_10_states_2017)
+
+# With the stacked datasets, I created a bar plot making sure to fill by year. I
+# had to change the position of the bars to "dodge" so they wouldn't be stacked
+# on top of each other in order to be more informative about the differences
+# across years. Again, I did coord_flip to make the state names easier to read.
+
+joined_bar <- joined_top_10_states %>%
+  group_by(year) %>%
+  ggplot(aes(x = state_name, y = percent, fill = year)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "State",
+       y = "Percent of Designers",
+       title = "Distribution of Designers in Top 10 States") +
+  coord_flip()
+  
+joined_bar
 ```
 
 
