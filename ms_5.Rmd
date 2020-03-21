@@ -1,0 +1,109 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(janitor)
+library(magrittr)
+```
+
+```{r average income and work hours by state, echo=FALSE}
+census_2019 <- read.csv("./raw-data/design_census_2019.csv") %>%
+  clean_names() %>%
+  rename(career_duration = i_ve_worked_in_design_for,
+         job_type = i_work_in,
+         industry_type = industries_i_work_with,
+         skills = my_skills_include,
+         currently_learning = i_am_currently_learning,
+         employment_status = i_am_currently_a_an,
+         job_level = i_m_a_an,
+         job_challenges = my_job_is_challenging_because,
+         job_pros = my_job_is_great_because,
+         org_size = my_organization_has,
+         department_size = my_department_has,
+         job_duration = i_ve_worked_here_for,
+         role_duration = i_ve_had_my_role_for,
+         work_hours = i_typically_work,
+         salary = i_make,
+         benefits = my_benefits_include,
+         advancement_opportunities = i_have,
+         learning_status = i_am,
+         design_satisfaction_level = i_am_1,
+         job_stability = i_feel,
+         side_gigs = on_the_side_i,
+         learned_design_from = i_learned_design_from,
+         degree_subject = i_got_my_degree_in,
+         number_of_jobs = i_ve_had,
+         up_to_date_method = i_stay_current_with_design_by,
+         job_satisfaction_level = i_m_currently,
+         zip_code = my_zip_code_is,
+         age = my_age_is,
+         gender = i_identify_as,
+         ethnicity = i_am_2,
+         issues_in_design = i_feel_the_most_critical_issues_challenges_currently_facing_design_are,
+         biggest_future_impact = i_think_the_emerging_future_technologies_that_will_have_the_biggest_impact_on_design_are,
+         most_critical_skills = i_think_the_most_critical_design_skills_for_the_future_will_be,
+         priorities = my_main_priorities_are) %>%
+  select(-i_work_in_1, -i_work_in_2, -i_work_in_3, -i_m_not_currently_working_because, -i_feel_the_most_critical_issues_challenges_currently_facing_design_are_1) %>%
+  mutate(census_year = 2019)
+
+us_zips <- read.csv("./raw-data/uszips.csv") %>%
+  select(zip, state_name, lat, lng)
+
+census_2019_by_state <- census_2019 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name) %>%
+  na.omit() %>%
+  group_by(state_name) %>%
+  count() %>%
+  arrange(desc(n))
+
+census_2019_total <- census_2019_by_state %>%
+  summarize(total_sum = sum(census_2019_by_state$n)) %>%
+  slice(1) %>%
+  pull(total_sum)
+
+top_10_states_2019 <- as_tibble(census_2019_by_state) %>%
+  slice(1:10) %>%
+  mutate(year = rep("2019"),
+         percent = n/census_2019_total*100)
+
+normalize_2019 <- tibble(count = rep(top_10_states_2019$n, 8),
+                         state_name = rep(top_10_states_2019$state_name, 8)) %>%
+  arrange(state_name)
+
+census_2019_salary_hours <- census_2019 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name, salary, work_hours) %>%
+  na.omit() %>%
+  filter(state_name %in% top_10_states_2019$state_name) %>%
+  group_by(state_name) 
+
+census_2019_salary_hours$salary <- factor(census_2019_salary_hours$salary, levels = c("Less than $25,000", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $149,999", "$150,000 to $199,999", "$200,000+"))
+
+# normalization attempt
+  # count(salary) %>%
+  # as_tibble() %>%
+  # add_row(state_name = "Ohio", salary = "$200,000+", n = 0) %>%  
+  # mutate(pct = n/normalize_2019$count) %>%
+  # arrange(state_name)
+  
+  
+census_2019_salary_by_state_bar <- census_2019_salary_hours %>%
+  group_by(state_name) %>%
+  ggplot(aes(x = salary, fill = state_name)) +
+  geom_bar() +
+  labs(x = "Salary",
+       y = "Number of designers",
+       title = "Distribution of salary of designers by state",
+       subtitle = "Top 10 states with most designers",
+       caption = "Data from 2019 Design Census") +
+  coord_flip()
+
+census_2019_salary_by_state_bar
+```
+
+The rpubs link is [here](https://rpubs.com/swcg1/587358)

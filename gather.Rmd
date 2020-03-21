@@ -263,5 +263,40 @@ joined_bar <- joined_top_10_states %>%
 joined_bar
 ```
 
+```{r average income and work hours by state, echo=FALSE}
+
+normalize_2019 <- tibble(count = rep(top_10_states_2019$n, 8),
+                         state_name = rep(top_10_states_2019$state_name, 8)) %>%
+  arrange(state_name)
+
+census_2019_salary_hours <- census_2019 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  select(zip_code, state_name, salary, work_hours) %>%
+  na.omit() %>%
+  filter(state_name %in% top_10_states_2019$state_name) %>%
+  group_by(state_name) 
+
+census_2019_salary_hours$salary <- factor(census_2019_salary_hours$salary, levels = c("Less than $25,000", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $149,999", "$150,000 to $199,999", "$200,000+"))
+
+# normalization attempt
+  # count(salary) %>%
+  # as_tibble() %>%
+  # add_row(state_name = "Ohio", salary = "$200,000+", n = 0) %>%  
+  # mutate(pct = n/normalize_2019$count) %>%
+  # arrange(state_name)
+  
+  
+census_2019_salary_by_state_bar <- census_2019_salary_hours %>%
+  group_by(state_name) %>%
+  ggplot(aes(x = salary, fill = state_name)) +
+  geom_bar() +
+  labs(x = "Salary",
+       y = "Number of designers",
+       title = "Distribution of Salary of Designers by State") +
+  coord_flip()
+
+census_2019_salary_by_state_bar
+```
+
 
 
