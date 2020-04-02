@@ -13,6 +13,9 @@ library(ggplot2)
 library(readr)
 library(janitor)
 library(magrittr)
+library(sf)
+library(tigris)
+options(tigris_class = "sf")
 ```
 
 ```{r cleaning and loading data, echo=FALSE}
@@ -147,7 +150,7 @@ detailed processes for making this graphics are in commented in the code)
 
 census_2019_by_state <- census_2019 %>%
   left_join(us_zips, by = c("zip_code" = "zip")) %>%
-  select(zip_code, state_name) %>%
+  select(zip_code, state_name, lat, lng) %>%
   na.omit() %>%
   group_by(state_name) %>%
   count() %>%
@@ -296,6 +299,22 @@ census_2019_salary_by_state_bar <- census_2019_salary_hours %>%
   coord_flip()
 
 census_2019_salary_by_state_bar
+```
+
+
+```{r map of density of designers, echo=FALSE}
+
+census_2019_map <- census_2019 %>%
+  left_join(us_zips, by = c("zip_code" = "zip"))
+
+states <- states(cb=T)
+states <- st_transform(states, 5070)
+states <- filter(states, !STUSPS %in% c("AK", "AS", "MP", "PR", "VI", "HI", "GU"))
+
+
+
+ggplot(states) +
+  geom_sf()
 ```
 
 
