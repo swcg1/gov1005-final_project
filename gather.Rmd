@@ -116,7 +116,7 @@ census_2017 <- read.csv("./raw-data/design_census_2017.csv") %>%
 # selected useful columns from the zipcode data.
 
 us_zips <- read.csv("./raw-data/uszips.csv") %>%
-  select(zip, state_name, lat, lng)
+  select(zip, state_name, state_id, lat, lng)
 
 us_companies <- read.csv("./raw-data/us_companies.csv")
 ```
@@ -305,16 +305,47 @@ census_2019_salary_by_state_bar
 ```{r map of density of designers, echo=FALSE}
 
 census_2019_map <- census_2019 %>%
-  left_join(us_zips, by = c("zip_code" = "zip"))
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  filter(!is.na(lng)) %>%
+  filter(!state_id %in% c("AK", "AS", "MP", "PR", "VI", "HI", "GU")) %>%
+  select(lat, lng)
+
+census_2017_map <- census_2017 %>%
+  left_join(us_zips, by = c("zip_code" = "zip")) %>%
+  filter(!is.na(lng)) %>%
+  filter(!state_id %in% c("AK", "AS", "MP", "PR", "VI", "HI", "GU")) %>%
+  select(lat, lng)
 
 states <- states(cb=T)
 states <- st_transform(states, 5070)
 states <- filter(states, !STUSPS %in% c("AK", "AS", "MP", "PR", "VI", "HI", "GU"))
 
+census_2017_latlon_projected <- census_2017_map %>% 
+  filter(!is.na(lng)) %>% 
+  st_as_sf(coords=c("lng", "lat"), crs = "+proj=longlat") %>% 
+  st_transform(crs=st_crs(states)) %>% 
+  st_coordinates(geometry)
 
+census_2017_latlon <- cbind(census_2017_map, census_2017_latlon_projected) %>%
+  mutate(year = rep("2017"))
 
-ggplot(states) +
-  geom_sf()
+census_2019_latlon_projected <- census_2019_map %>% 
+  filter(!is.na(lng)) %>% 
+  st_as_sf(coords=c("lng", "lat"), crs = "+proj=longlat") %>% 
+  st_transform(crs=st_crs(states)) %>% 
+  st_coordinates(geometry)
+
+census_2019_latlon <- cbind(census_2019_map, census_2019_latlon_projected) %>%
+  mutate(year = rep("2019"))
+
+census_all_latlon <- rbind(census_2019_latlon, census_2017_latlon)
+
+census_all_latlon %>% {
+  ggplot(states) +
+    geom_sf() +
+    geom_point(data = filter(., year == "2017"), aes(x = X, y = Y, color = year), size = 0.5) +
+    theme_void()
+}
 ```
 
 
